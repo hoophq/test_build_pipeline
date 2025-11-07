@@ -51,11 +51,11 @@ build-tar-files:
 	rm -rf ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}
 
 build-go: build-clean-folder
-	env CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}/ main.go
+	env CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}/main main.go
 
 build-webapp:
 	mkdir -p ${DIST_FOLDER}
 	cd ./webapp && npm install && npm run release && cd ../
 	tar -czf ${DIST_FOLDER}/webapp.tar.gz -C ./webapp/resources .
 
-.PHONY: build-go build-webapp build-rust-darwin-all build-rust-linux-all build-rust-single build-clean-folder
+.PHONY: build-go build-webapp build-rust-darwin-all build-rust-linux-all build-rust-single build-clean-folder build-tar-files

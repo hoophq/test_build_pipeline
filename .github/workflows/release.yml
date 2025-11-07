@@ -281,6 +281,14 @@ jobs:
           merge-archive: true
           path: .
           
+      - name: Debug - List Downloaded Artifacts
+        run: |
+          echo "Contents of dist/binaries:"
+          find dist/binaries -type f -o -type d | head -20 || true
+          echo ""
+          echo "Directory structure:"
+          ls -la dist/binaries/ || true
+          
       - name: Build Tar Files for All Architectures
         run: |
           GOOS=darwin GOARCH=amd64 make build-tar-files
