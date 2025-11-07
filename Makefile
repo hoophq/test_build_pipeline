@@ -35,7 +35,7 @@ build-rust-linux-all:
 	GOOS=linux GOARCH=arm64 $(MAKE) build-rust-single
 
 # Build single Rust binary using GOOS/GOARCH variables
-build-rust-single:
+build-rust-single: build-clean-folder
 	cd agentrs && cargo build --release --target ${RUST_TARGET} && \
 	cp target/${RUST_TARGET}/release/agentrs ../dist/binaries/${GOOS}_${GOARCH}/hoop_rs
 

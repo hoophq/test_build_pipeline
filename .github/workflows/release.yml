@@ -279,7 +279,7 @@ jobs:
         with:
           pattern: dist-artifacts-*
           merge-archive: true
-          path: dist/
+          path: .
           
       - name: Build Tar Files for All Architectures
         run: |
