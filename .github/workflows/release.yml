@@ -1,4 +1,4 @@
-name: Release
+name: Test Release
 
 on:
   push:
@@ -181,7 +181,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Build Windows Arm64
     environment: production
-    needs: [test]
 
     steps:
       - name: Checkout Hoop
