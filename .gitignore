@@ -1,6 +1,6 @@
 /agentrs/target
 dist
-webapp/resources
+webapp/resources/main.js
 webapp/node_modules
 
 
