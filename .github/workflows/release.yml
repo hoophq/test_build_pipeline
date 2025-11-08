@@ -284,29 +284,43 @@ jobs:
           path: .
           if-no-files-found: warn
           
-      - name: Debug - Check What Was Downloaded
+      - name: Merge Artifacts into dist/
         run: |
-          echo "=== Immediately after download ==="
-          echo "Current directory:"
-          pwd
-          echo ""
-          echo "Contents of current directory:"
-          ls -la
-          echo ""
-          echo "Checking for dist directory:"
-          if [ -d "dist" ]; then
-            echo "✓ dist directory exists"
-            echo "Contents of dist:"
-            ls -la dist/ || true
-            if [ -d "dist/binaries" ]; then
-              echo "✓ dist/binaries exists"
-              echo "Contents of dist/binaries:"
-              ls -la dist/binaries/ || true
-            else
-              echo "✗ dist/binaries does not exist"
+          echo "=== Merging artifacts into dist/ directory ==="
+          mkdir -p dist
+          # Merge all dist-artifacts-* directories into dist/
+          for artifact_dir in dist-artifacts-*; do
+            if [ -d "$artifact_dir" ]; then
+              echo "Processing $artifact_dir..."
+              # Check what's inside the artifact directory
+              if [ -d "$artifact_dir/dist" ]; then
+                # Artifact contains dist/ subdirectory - merge its contents
+                echo "  Found dist/ subdirectory, merging contents..."
+                if [ -d "$artifact_dir/dist/binaries" ]; then
+                  # Merge binaries directories
+                  mkdir -p dist/binaries
+                  cp -r "$artifact_dir/dist/binaries"/* dist/binaries/ 2>/dev/null || true
+                fi
+                # Copy any other files from dist/
+                cp -r "$artifact_dir/dist"/* dist/ 2>/dev/null || true
+              else
+                # Artifact might be the dist directory itself
+                echo "  No dist/ subdirectory found, checking contents..."
+                ls -la "$artifact_dir" || true
+                # Try to copy if it looks like it contains binaries
+                if [ -d "$artifact_dir/binaries" ]; then
+                  mkdir -p dist/binaries
+                  cp -r "$artifact_dir/binaries"/* dist/binaries/ 2>/dev/null || true
+                fi
+              fi
             fi
+          done
+          echo ""
+          echo "=== Contents of merged dist/ directory ==="
+          if [ -d "dist" ]; then
+            find dist -type f -o -type d | head -30 || true
           else
-            echo "✗ dist directory does not exist"
+            echo "dist directory was not created"
           fi
           
       - name: Verify Artifacts Downloaded
