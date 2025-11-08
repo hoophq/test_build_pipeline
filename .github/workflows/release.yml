@@ -275,18 +275,75 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Download Artifacts
+        id: download-artifacts
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           pattern: dist-artifacts-*
           merge-archive: true
           path: .
+          if-no-files-found: warn
+          
+      - name: Debug - Check What Was Downloaded
+        run: |
+          echo "=== Immediately after download ==="
+          echo "Current directory:"
+          pwd
+          echo ""
+          echo "Contents of current directory:"
+          ls -la
+          echo ""
+          echo "Checking for dist directory:"
+          if [ -d "dist" ]; then
+            echo "✓ dist directory exists"
+            echo "Contents of dist:"
+            ls -la dist/ || true
+            if [ -d "dist/binaries" ]; then
+              echo "✓ dist/binaries exists"
+              echo "Contents of dist/binaries:"
+              ls -la dist/binaries/ || true
+            else
+              echo "✗ dist/binaries does not exist"
+            fi
+          else
+            echo "✗ dist directory does not exist"
+          fi
           
       - name: Verify Artifacts Downloaded
         run: |
+          echo "=== Checking for dist directory ==="
           if [ ! -d "dist" ]; then
-            echo "Error: dist directory not found after downloading artifacts"
+            echo "ERROR: dist directory not found after downloading artifacts"
+            echo ""
+            echo "This could mean:"
+            echo "1. The dependent jobs didn't create artifacts"
+            echo "2. The artifacts are empty"
+            echo "3. The artifact download failed"
+            echo ""
+            echo "Expected artifacts from these jobs:"
+            echo "  - darwin-amd64"
+            echo "  - darwin-arm64"
+            echo "  - windows-amd64"
+            echo "  - windows-arm64"
+            echo "  - linux-amd64"
+            echo "  - linux-arm64"
+            echo "  - build-webapp"
+            echo "  - build-rust-binaries-darwin"
+            echo "  - build-rust-binaries-linux"
+            echo ""
+            echo "Checking what was actually downloaded..."
+            ls -la || true
+            echo ""
+            echo "Checking if any artifacts exist..."
+            find . -type d -name "dist*" 2>/dev/null || echo "No dist directories found"
+            echo ""
+            echo "Checking download step status..."
+            if [ "${{ steps.download-artifacts.outcome }}" != "success" ]; then
+              echo "WARNING: Download step did not succeed"
+            fi
             exit 1
           fi
+          echo "✓ dist directory found"
           echo "Artifacts downloaded successfully"
           
       - name: Debug - List Downloaded Artifacts
