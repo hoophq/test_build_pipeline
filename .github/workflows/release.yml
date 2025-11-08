@@ -281,13 +281,30 @@ jobs:
           merge-archive: true
           path: .
           
+      - name: Verify Artifacts Downloaded
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Error: dist directory not found after downloading artifacts"
+            exit 1
+          fi
+          echo "Artifacts downloaded successfully"
+          
       - name: Debug - List Downloaded Artifacts
         run: |
-          echo "Contents of dist/binaries:"
-          find dist/binaries -type f -o -type d | head -20 || true
+          echo "=== Current directory structure ==="
+          ls -la || true
           echo ""
-          echo "Directory structure:"
-          ls -la dist/binaries/ || true
+          echo "=== Contents of dist (if exists) ==="
+          ls -la dist/ || true
+          echo ""
+          echo "=== Contents of dist/binaries (if exists) ==="
+          find dist/binaries -type f -o -type d 2>/dev/null | head -20 || echo "dist/binaries does not exist"
+          echo ""
+          echo "=== All files in current directory (recursive) ==="
+          find . -type f -name "main" -o -name "hoop_rs" -o -name "*.tar.gz" 2>/dev/null | head -20 || true
+          echo ""
+          echo "=== Directory tree (first 3 levels) ==="
+          find . -maxdepth 3 -type d 2>/dev/null | sort || true
           
       - name: Build Tar Files for All Architectures
         run: |

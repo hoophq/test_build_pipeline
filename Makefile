@@ -43,7 +43,15 @@ build-clean-folder:
 	mkdir -p ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}
 	
 build-tar-files:
-	mkdir -p ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}
+	@if [ ! -d "${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}" ]; then \
+		echo "Error: Directory ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH} does not exist"; \
+		exit 1; \
+	fi
+	@if [ -z "$$(ls -A ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH} 2>/dev/null)" ]; then \
+		echo "Error: Directory ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH} is empty"; \
+		echo "Contents should be: main (Go binary) and/or hoop_rs (Rust binary)"; \
+		exit 1; \
+	fi
 	tar -czvf ${DIST_FOLDER}/binaries/hoop_${VERSION}_${OS}_${GOARCH}.tar.gz -C ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH} .
 	tar -czvf ${DIST_FOLDER}/binaries/hoop_${VERSION}_${OS}_${SYMLINK_ARCH}.tar.gz -C ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH} .
 	sha256sum ${DIST_FOLDER}/binaries/hoop_${VERSION}_${OS}_${GOARCH}.tar.gz > ${DIST_FOLDER}/binaries/hoop_${VERSION}_${OS}_${GOARCH}_checksum.txt
@@ -51,7 +59,7 @@ build-tar-files:
 	rm -rf ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}
 
 build-go: build-clean-folder
-	env CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}/main main.go
+	env CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${DIST_FOLDER}/binaries/${GOOS}_${GOARCH}/ main.go
 
 build-webapp:
 	mkdir -p ${DIST_FOLDER}
